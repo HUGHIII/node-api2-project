@@ -16,12 +16,18 @@ router.post('/',(req, res)=>{
 });
 
 router.post('/:id/comments', (req,res)=> {
-    !req.body.text ? res.status(400).json({message:'provide text'}) :
-    blog.insertComment(req.body)
+     const newComment = {
+        text:req.body.text,
+        post_id:req.params.id
+    } 
+     !req.body.text ? res.status(400).json({message:'provide text'}) :
+ 
+    blog.insertComment(newComment)
     .then(blg =>{
-          !blg.id ? res.status(404).json({message:'no id'}):
+        //   !blg.id ? res.status(404).json({message:'no id'}):
           res.status(201).json(blg)
     })
+    .catch(err=>({message:'error'}))
 });// figure out how to test
 
 router.get('/',(req,res)=>{
@@ -37,11 +43,12 @@ router.get('/',(req,res)=>{
 
 
 router.get('/:id',(req,res)=>{
-    blog.findById(req.params.id)
+   
+    !req.params.id  ? res.status(404).json({message:'post doesnt exist'}): blog.findById(req.params.id) 
     .then(blg=>{
         console.log(blg,'blg')
-        blog.id === [] ? res.status(404).json({message:'post doesnt exist'}):
-        res.status(201).json(blog);
+       
+        res.status(201).json(blg);
     })
     .catch(err=>{
         res.status(500).json({message:'unable to retrieve data'})
@@ -50,7 +57,7 @@ router.get('/:id',(req,res)=>{
 
 router.get('/:id/comments',(req,res)=>{
     blog.findPostComments(req.params.id)
-    console.log(blog,'blog')
+    
     .then(blg=>{
         console.log(blg,'blg')
         if (blg) {
